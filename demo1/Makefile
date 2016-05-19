@@ -15,16 +15,36 @@
 CC = g++
 FLAGS = -g -o
 
-INCLUDE = -I/usr/X11R6/include -I/usr/include/GL -I/usr/include -I/home/mcedeno/LevelSetGUI
+CUDA_PATH ?= /usr/local/cuda-7.5
+CUDA_INC_PATH ?= $(CUDA_PATH)/include
+CUDA_BIN_PATH ?= $(CUDA_PATH)/bin
+CUDA_LIB_PATH ?= $(CUDA_PATH)/lib
+
+NVCC          ?= $(CUDA_BIN_PATH)/nvcc
+
+
+# Modify the -I/home/mcedeno/... line to the location of the LevelSetsGUI directory
+INCLUDE = -I/usr/X11R6/include -I/usr/include/GL -I/usr/include -I/home/mcedeno/projects/LevelSetGUI
 LIBDIR = -L/usr/X11R6/lib -L/usr/local/lib
-# Please add any files you need to SOURCES below.
-SOURCES = bab_gui.cpp
 LIBS = -lGLEW -lGL -lGLU -lglut -lm
 
-EXENAME = bab_gui
+EXENAME = stream_gui
 
-all: $(SOURCES)
-	$(CC) $(FLAGS) $(EXENAME) $(INCLUDE) $(LIBDIR) $(SOURCES) $(LIBS)
+all: $(EXENAME)
+
+
+#stream_gui: ../bab_gui.cpp stream_gui.o 
+#	$(CC) -std=c++11  $^ -o $@ -O3  $(INCLUDE) $(LIBDIR) $(LIBS) -Wall -I$(CUDA_INC_PATH)
+
+#stream_gui.o: bab_stream.cu
+#	$(NVCC) $<  -O3 -g -std=c++11 --expt-relaxed-constexpr-I$(CUDA_INC_PATH) -o $@ $(INCLUDE)
+
+
+stream_gui: bab_stream.cu gui.o
+	$(NVCC) $< -g -std=c++11 --expt-relaxed-constexpr-I$(CUDA_INC_PATH)
+
+gui.o: ../bab_gui.cpp
+	$(CC) -std=c++11 $^ $(INCLUDE) $(LIBDIR) $(LIBS)
 
 clean:
 	rm -f *.o $(EXENAME) 

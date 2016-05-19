@@ -171,12 +171,20 @@ Level_Set_GUI::~Level_Set_GUI(){
 
 void Level_Set_GUI::update_candidates(vector<float> new_intervals)
 {
-    candidate_vector = new_intervals;
+    //candidate_vector = new_intervals;
+    for (int i = 0; i < new_intervals.size(); i++)
+    {
+	candidate_vector.push_back(new_intervals[i]);
+    }	
 }
 
 void Level_Set_GUI::update_solutions(vector<float> new_intervals)
 {
-    solution_vector = new_intervals;
+    //solution_vector = new_intervals;
+    for (int i = 0; i < new_intervals.size(); i++)
+    {
+	solution_vector.push_back(new_intervals[i]);
+    }
 }
 
 void Level_Set_GUI::mainLoop()

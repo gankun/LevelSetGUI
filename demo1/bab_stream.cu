@@ -8,6 +8,7 @@
 #include <vector>
 #include <time.h>
 #include <unistd.h> // sleep
+#include "../bab_gui.cpp"
 #define BITS_PER_INT 32
 #define NaN std::numeric_limits<double>::quiet_NaN()
 unsigned long NUM_DIMS = 0; // Global variable holding the number of dimensions per interval
@@ -228,6 +229,7 @@ int main(int argc, char **argv) {
 		printf("./bab <number_of_dims> <min epsilon>\n");
 		return -1;
 	}
+
 	assert( sizeof(size_t) == 8 ); 
 	assert( sizeof(unsigned long) == 8 );
 	NUM_DIMS = (unsigned long) atoi(argv[1]);
@@ -248,6 +250,16 @@ int main(int argc, char **argv) {
 	uint NUM_BLOCKS = BLOCKS_PER_SM * NUM_SMS;
 	unsigned long INTERVAL_SIZE = (2 * sizeof(float) * NUM_DIMS);
 	unsigned long FLOATS_PER_INTERVAL = 2 * NUM_DIMS;
+	
+	// GUI INIT
+
+	Level_Set_GUI &LS_GUI = Level_Set_GUI::getInstance();
+	LS_GUI.dimensions = NUM_DIMS;
+	LS_GUI.setup(argc, argv);
+
+	// END GUI
+
+
 	// Host-Side allocations
 	// Make up a search space
 	float ** search_space = new float * [NUM_DIMS];
@@ -350,6 +362,14 @@ int main(int argc, char **argv) {
 			final = clock();
 		}
 		update_candidates(candidate_intervals, satisfactory_intervals, NUM_DIMS, EPSILON);
+
+		// UPDATE INTERVALS ON GUI
+
+		LS_GUI.update_candidates(candidate_intervals);
+		LS_GUI.update_solutions(satisfactory_intervals);
+
+		// END GUI
+
 		printf("Iteration %lu time: %f (s). Num candidates: %lu, Num solutions: %lu\n",
 			iterations,
 			(final - initial) / CLOCKS_PER_SEC,
@@ -378,6 +398,10 @@ int main(int argc, char **argv) {
 		delete [] search_space[i];
 	}
 	delete search_space;
+
+	// RUN GUI LOOP
+	LS_GUI.mainLoop();
+
 }
 
 void widest_dims(float *** initial_search_spaces, int num_devices, int NUM_DIMS) {
