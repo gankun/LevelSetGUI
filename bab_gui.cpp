@@ -57,6 +57,9 @@ class Level_Set_GUI
 		void setup(int argc, char * argv[]);
         void mainLoop();
 		
+        void update_candidates(vector<float> new_intervals);
+        void update_solutions(vector<float> new_intervals);
+        
 		static Level_Set_GUI& getInstance() // Singleton is accessed via getInstance()
 		{
 			static Level_Set_GUI instance; // lazy singleton, instantiated on first use
@@ -64,10 +67,7 @@ class Level_Set_GUI
 		}
 
 		int dimensions;
-		// Intervals Vector
-		std::vector<float> interval_vector;
-		// Intervals Solutions
-		std::vector<float> solution_vector;
+
 
 
 
@@ -95,6 +95,11 @@ class Level_Set_GUI
         
         Vector3d get_arc_vec(int x, int y);
 
+        		// Intervals Vector
+		std::vector<float> candidate_vector;
+		// Intervals Solutions
+		std::vector<float> solution_vector;
+        
 		/* Flag deciding whether to draw interval/solution boxes */
 		bool drawSolution = true;
 		bool drawInterval = true;
@@ -162,6 +167,16 @@ Level_Set_GUI::Level_Set_GUI(void){
 Level_Set_GUI::~Level_Set_GUI(){
 
 	
+}
+
+void Level_Set_GUI::update_candidates(vector<float> new_intervals)
+{
+    candidate_vector = new_intervals;
+}
+
+void Level_Set_GUI::update_solutions(vector<float> new_intervals)
+{
+    solution_vector = new_intervals;
 }
 
 void Level_Set_GUI::mainLoop()
@@ -433,7 +448,7 @@ void Level_Set_GUI::displayImpl()
 	if (drawInterval)
 	{
 		float colorB[3] = { 0.1f, 0.1f, 0.7f };
-		draw_boxes(interval_vector, dimensions, colorB, false);
+		draw_boxes(candidate_vector, dimensions, colorB, false);
 	}
 
 	if (drawSolution)
@@ -714,37 +729,3 @@ void Level_Set_GUI::mouse_movedImpl(int x, int y)
 }
 
 
-int main(int argc, char * argv[])
-{
-
-	// Get parameters from command line.
-	std::vector<float> solutions;
-	std::vector<float> intervals;
-    solutions.push_back(0.0f);
-    solutions.push_back(5.0f);
-    solutions.push_back(0.0f);
-    solutions.push_back(5.0f);
-    solutions.push_back(0.0f);
-    solutions.push_back(5.0f);
-    
-    intervals.push_back(-5.0f);
-    intervals.push_back(0.0f);
-    intervals.push_back(-5.0f);
-    intervals.push_back(0.0f);
-    intervals.push_back(-5.0f);
-    intervals.push_back(0.0f);
-
-	int dimensions = 3;
-
-	Level_Set_GUI &LS_GUI = Level_Set_GUI::getInstance();
-	LS_GUI.dimensions = dimensions;
-	LS_GUI.interval_vector = intervals;
-	LS_GUI.solution_vector = solutions;
-
-    LS_GUI.setup(argc, argv);
-    
-    LS_GUI.mainLoop();
-    
-
-	return 0;
-}

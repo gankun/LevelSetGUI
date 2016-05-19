@@ -18,10 +18,10 @@ FLAGS = -g -o
 INCLUDE = -I/usr/X11R6/include -I/usr/include/GL -I/usr/include -I/home/mcedeno/LevelSetGUI
 LIBDIR = -L/usr/X11R6/lib -L/usr/local/lib
 # Please add any files you need to SOURCES below.
-SOURCES = bab_demo.cpp
+SOURCES = bab_gui.cpp
 LIBS = -lGLEW -lGL -lGLU -lglut -lm
 
-EXENAME = bab_demo
+EXENAME = bab_gui
 
 all: $(SOURCES)
 	$(CC) $(FLAGS) $(EXENAME) $(INCLUDE) $(LIBDIR) $(SOURCES) $(LIBS)
