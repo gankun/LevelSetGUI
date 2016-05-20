@@ -154,12 +154,12 @@ Level_Set_GUI::Level_Set_GUI(void){
 	dimensions = 2;
 
 	// Initialize arrays
-	cam_orientation_axis[0] = .75;
-	cam_orientation_axis[1] = .75;
+	cam_orientation_axis[0] = 0;
+	cam_orientation_axis[1] = 0;
 	cam_orientation_axis[2] = 1;
 	cam_position[0] = 0;
-	cam_position[1] = -5;
-	cam_position[2] = 10;
+	cam_position[1] = 0;
+	cam_position[2] = 12;
 
 	current_rotation = MatrixXd::Identity(4, 4);
 }
@@ -341,6 +341,18 @@ void Level_Set_GUI::key_pressedImpl(unsigned char key, int x, int y)
         case 'f':
             fillSolution = !fillSolution;
             break;
+        case 'j':
+            x_view_angle -= 20;
+            break;
+        case 'l':
+            x_view_angle += 20;
+            break;
+        case 'k':
+            y_view_angle -= 20;
+            break;
+        case 'i':
+            y_view_angle += 20;
+            break;
     }
 }
 
@@ -397,6 +409,9 @@ void Level_Set_GUI::displayImpl()
     glRotatef((-cam_orientation_angle * 180.0 / M_PI), cam_orientation_axis[0],
         cam_orientation_axis[1], cam_orientation_axis[2]);
     
+    glRotatef(x_view_angle, 0, 1, 0);
+    glRotatef(y_view_angle, 1, 0, 0);
+
     glTranslatef(cam_position[0],cam_position[1], cam_position[2]);
   /*  
     // Change the camera position and angle based on mouse movement.
@@ -442,17 +457,7 @@ void Level_Set_GUI::displayImpl()
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-    // test cube
-    glBegin(GL_POLYGON);
-    glColor3f(0.0f, 0.4f, 0.8f);
-
-    glVertex3f(0.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 6.0f, 0.0f);
-    glVertex3f(6.0f, 6.0f, 0.0f);
-    glVertex3f(6.0f, 0.0f, 0.0f);
-
-    glEnd();
-    
+   
 	if (drawInterval)
 	{
 		float colorB[3] = { 0.1f, 0.1f, 0.7f };
