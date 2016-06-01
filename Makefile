@@ -12,11 +12,11 @@
 # fool around with the 'INCLUDE' and 'LIBDIR' lines below before the Makefile
 # can compile the OpenGL parts successfully.
 ###############################################################################
-CC = g++
+CC = g++ 
 FLAGS = -g -o
 
 INCLUDE = -I/usr/X11R6/include -I/usr/include/GL -I/usr/include -I/home/mcedeno/LevelSetGUI
-LIBDIR = -L/usr/X11R6/lib -L/usr/local/lib
+LIBDIR = -L/usr/X11R6/lib -L/usr/local/lib -std=c++11
 # Please add any files you need to SOURCES below.
 SOURCES = bab_demo.cpp
 LIBS = -lGLEW -lGL -lGLU -lglut -lm
