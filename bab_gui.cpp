@@ -56,7 +56,7 @@ class Level_Set_GUI
 		~Level_Set_GUI(); // Destructor
 		void setup(int argc, char * argv[]);
         void mainLoop();
-		
+        void mainLoopEvent();
         void update_candidates(vector<float> new_intervals);
         void update_solutions(vector<float> new_intervals);
         
@@ -68,8 +68,8 @@ class Level_Set_GUI
 
 		int dimensions;
 
-
-
+	static void display();
+       
 
 	private:
         static Level_Set_GUI* current_instance;
@@ -79,7 +79,7 @@ class Level_Set_GUI
         
         float * box_color(float * color);
         
-        static void display();
+        //static void display();
         static void key_pressed(unsigned char key, int x, int y);
         static void mouse_pressed(int button, int state, int x, int y);
         static void mouse_moved(int x, int y);
@@ -118,14 +118,14 @@ class Level_Set_GUI
 		/* Camera Settings */
 		float cam_orientation_angle = 0;
         float cam_orientation_axis[3];
-		float x_view_angle = 20, y_view_angle = 20;
+		float x_view_angle = 0, y_view_angle = 0;
 		float cam_position[3];
 
 
 		/* Fulstrum */
-		float near_param = 1, far_param = 100,
-			left_param = -0.5, right_param = 0.5,
-			top_param = 0.5, bottom_param = -0.5;
+		float near_param = 1, far_param = 75,
+			left_param = -.25, right_param = .25,
+			top_param = .25, bottom_param = -.25;
 
 		const float step_size = 0.2;
 		const float x_view_step = 90.0, y_view_step = 90.0;
@@ -159,7 +159,7 @@ Level_Set_GUI::Level_Set_GUI(void){
 	cam_orientation_axis[2] = 1;
 	cam_position[0] = 0;
 	cam_position[1] = 0;
-	cam_position[2] = 12;
+	cam_position[2] = -55;
 
 	current_rotation = MatrixXd::Identity(4, 4);
 }
@@ -190,6 +190,11 @@ void Level_Set_GUI::update_solutions(vector<float> new_intervals)
 void Level_Set_GUI::mainLoop()
 {
     glutMainLoop();
+}
+
+void Level_Set_GUI::mainLoopEvent()
+{
+    //glutMainLoopEvent();
 }
 
 void Level_Set_GUI::setup(int argc, char * argv[]) {
