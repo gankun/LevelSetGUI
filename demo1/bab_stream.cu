@@ -153,7 +153,10 @@ void update_candidates(std::vector<float> &v, std::vector<float> &s, unsigned lo
   	v.erase(end_vaild, v.end());
 
 }
-__device__ inline uint determine_valid_interval(float * start, unsigned long NUM_DIMS)
+
+__device__ inline float squared(float v) { return v * v; }
+
+__device__ inline uint determine_valid_interval_line(float * start, unsigned long NUM_DIMS)
 {
 	float xmin = start[0];
 	float xmax = start[1];
@@ -170,6 +173,34 @@ __device__ inline uint determine_valid_interval(float * start, unsigned long NUM
 
 }
 
+__device__ inline uint determine_valid_interval_sphere(float * start, unsigned long NUM_DIMS)
+{
+	float R = 1.0;
+	float C1X = start[0];
+	float C1Y = start[2];
+	float C1Z = start[4];
+	float C2X = start[1];
+	float C2Y = start[3];
+	float C2Z = start[5];
+	float SX = 0.0;
+	float SY = 0.0;
+	float SZ = 0.0;
+	float xmin = start[0];
+	float xmax = start[1];
+	float ymin = start[2];
+	float ymax = start[3];
+
+    float dist_squared = R * R;
+    /* assume C1 and C2 are element-wise sorted, if not, do that now */
+    if (SX < C1X) dist_squared -= squared(SX - C1X);
+    else if (SX > C2X) dist_squared -= squared(SX - C2X);
+    if (SY < C1Y) dist_squared -= squared(SY - C1Y);
+    else if (SY > C2Y) dist_squared -= squared(SY - C2Y);
+    if (SZ < C1Z) dist_squared -= squared(SZ - C1Z);
+    else if (SZ > C2Z) dist_squared -= squared(SZ - C2Z);
+    return dist_squared > 0;
+
+}
 
 // SM 3.0 > devices only
 __global__
@@ -181,7 +212,7 @@ void branch_and_bound(float * intervals, unsigned long num_floats, unsigned long
 	while(thread_index < num_floats) {
 		float new_val = intervals[thread_index];
 		float * start_addr = intervals + thread_index;
-		uint result = determine_valid_interval(start_addr, NUM_DIMS);
+		uint result = determine_valid_interval_sphere(start_addr, NUM_DIMS);
 		new_val = (result == 1 ? new_val : NaN);
 		// printf("New val: %f\n", new_val);
 		intervals[thread_index] = new_val;
@@ -316,7 +347,7 @@ int main(int argc, char **argv) {
 			candidate_intervals.push_back(initial_search_spaces[i][j][1]); // upper bound
 		}
 	}
-	printf("size of candidate intervals: %lu\n", candidate_intervals.size());
+
 	while(candidate_intervals.size() != 0) 
 	{
 		initial = clock();
@@ -368,11 +399,19 @@ int main(int argc, char **argv) {
 		LS_GUI.update_candidates(candidate_intervals);
 		LS_GUI.update_solutions(satisfactory_intervals);
 
-		// END GUI
+// if (iterations < 25)
+// {
+ 
+// 		for (unsigned long tempnumer = 0; tempnumer < candidate_intervals.size(); tempnumer++)
+// 		{
+// 				printf(" %f ", candidate_intervals[tempnumer]);
+// 		}
+//  printf("\n");
+// }		// END GUI
 
 		printf("Iteration %lu time: %f (s). Num candidates: %lu, Num solutions: %lu\n",
 			iterations,
-			(final - initial) / CLOCKS_PER_SEC,
+			(float)(final - initial) / CLOCKS_PER_SEC,
 			candidate_intervals.size() / (2 * NUM_DIMS),
 			satisfactory_intervals.size() / (2 * NUM_DIMS)
 		);
