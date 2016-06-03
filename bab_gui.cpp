@@ -160,7 +160,7 @@ Level_Set_GUI::Level_Set_GUI(void){
 	cam_position[0] = 0;
 	cam_position[1] = 0;
 	cam_position[2] = -55;
-
+    last_rotation = MatrixXd::Identity(4,4);
 	current_rotation = MatrixXd::Identity(4, 4);
 }
 
@@ -320,44 +320,33 @@ void Level_Set_GUI::key_pressedImpl(unsigned char key, int x, int y)
             break;
             
         case 'w':
-            cam_position[1] += .3F;
-            break;
-            
-        case 's':
             cam_position[1] -= .3F;
             break;
             
-        case 'a':
-            cam_position[0] -= .3F;
+        case 's':
+            cam_position[1] += .3F;
             break;
             
-        case 'd':
+        case 'a':
             cam_position[0] += .3F;
             break;
             
+        case 'd':
+            cam_position[0] -= .3F;
+            break;
+            
         case 'z':
-            cam_position[2] -= .3F;
+            cam_position[2] += .3F;
             break;
             
         case 'c':
-            cam_position[2] += .3F;
+            cam_position[2] -= .3F;
             break;
             
         case 'f':
             fillSolution = !fillSolution;
             break;
-        case 'j':
-            x_view_angle -= 20;
-            break;
-        case 'l':
-            x_view_angle += 20;
-            break;
-        case 'k':
-            y_view_angle -= 20;
-            break;
-        case 'i':
-            y_view_angle += 20;
-            break;
+
     }
 }
 
@@ -414,20 +403,22 @@ void Level_Set_GUI::displayImpl()
     glRotatef((-cam_orientation_angle * 180.0 / M_PI), cam_orientation_axis[0],
         cam_orientation_axis[1], cam_orientation_axis[2]);
     
-    glRotatef(x_view_angle, 0, 1, 0);
-    glRotatef(y_view_angle, 1, 0, 0);
+    //glRotatef(x_view_angle, 0, 1, 0);
+    //glRotatef(y_view_angle, 1, 0, 0);
 
     glTranslatef(cam_position[0],cam_position[1], cam_position[2]);
-  /*  
+  
     // Change the camera position and angle based on mouse movement.
     if (mouse_x != last_mx || mouse_y != last_my) 
     {
+        
         Vector3d va, vb;
         // compute the arcball angle and axis
         va = get_arc_vec(last_mx, last_my); 
         vb = get_arc_vec(mouse_x, mouse_y); 
         float angle = acos(min(1.0, va.dot(vb)));
         axis_in_cam = va.cross(vb);
+        
         
         current_rotation = (get_rotate_mat(axis_in_cam(0), 
             axis_in_cam(1), axis_in_cam(2), angle));
@@ -441,7 +432,7 @@ void Level_Set_GUI::displayImpl()
     }
     
     glMultMatrixd(&last_rotation(0,0));
-*/
+
 	glViewport(
 		margin + ticksize,
 		margin + ticksize,
@@ -503,24 +494,26 @@ void Level_Set_GUI::draw_boxes(std::vector<float> intervals, int n, float * colo
 
 				// Draw the 3d Cube.
                 
-                // Draw the front side.
+                // Draw the back side.
                 glBegin(GL_POLYGON);
 				tempColor = box_color(color);
-				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
-				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 4]);
-				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 4]);
-                glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 4]);
-				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 4]);				
-				glEnd();
-             
-                // Draw the back side.                
-				glBegin(GL_POLYGON);
-                tempColor = box_color(color);
 				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
 				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 5]);
 				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 5]);
                 glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 5]);
-				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 5]);
+				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 5]);				
+				glEnd();
+             
+                // Draw the front side.                
+				glBegin(GL_POLYGON);
+                tempColor = box_color(color);
+				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
+				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 4]);
+                glVertex3f(intervals[i], intervals[i + 3], intervals[i + 4]);
+                glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 4]);
+				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 4]);
+                
+				
 				glEnd();
                 
                 // Draw the top side.
