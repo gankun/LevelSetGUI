@@ -104,7 +104,7 @@ class Level_Set_GUI
 		bool drawSolution = true;
 		bool drawInterval = true;
 
-		bool fillSolution = false;
+		bool fillSolution = true;
 
 		int iter;
 		int * inter_array;
@@ -471,8 +471,10 @@ void Level_Set_GUI::displayImpl()
 
 	if (drawSolution)
 	{
+        lineWidth = 1;
 		float colorA[3] = { 0.7f, 0.1f, 0.1f };
 		draw_boxes(solution_vector, dimensions, colorA, fillSolution);
+        lineWidth = .4f;
 	}
 
 
@@ -496,99 +498,70 @@ void Level_Set_GUI::draw_boxes(std::vector<float> intervals, int n, float * colo
 		{
 			if (n == 3)
 			{
-				Vector3f A, B, C, Norm;
-				float R, G, Bl;
-				//Vector3f A, B, C, Norm;
+					
 				glLineWidth((GLfloat)lineWidth);
 
 				// Draw the 3d Cube.
+                
+                // Draw the front side.
+                glBegin(GL_POLYGON);
+				tempColor = box_color(color);
+				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
+				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 4]);
+				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 4]);
+                glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 4]);
+				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 4]);				
+				glEnd();
+             
+                // Draw the back side.                
 				glBegin(GL_POLYGON);
-
-				A = { intervals[i], intervals[i + 2], intervals[i + 4] };
-				B = {intervals[i], intervals[i + 3], intervals[i + 4]};
-				C = { intervals[i + 1], intervals[i + 2], intervals[i + 4] };
-
                 tempColor = box_color(color);
 				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
-
-				// Draw front square.
-				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 4]);
-				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 4]);
-				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 4]);
-				glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 4]);
-				glEnd();
-				glBegin(GL_POLYGON);
-
-
-				A = { intervals[i], intervals[i + 2], intervals[i + 4] };
-				B = { intervals[i + 1], intervals[i + 2], intervals[i + 4] };
-				C = { intervals[i], intervals[i + 3], intervals[i + 4] };
-
-				tempColor = box_color(color);
-				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
-
-				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 4]);
-				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 4]);
-				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 4]);
-				glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 4]);
-				glEnd();
-				glBegin(GL_POLYGON);
-
-
-				A = { intervals[i], intervals[i + 2], intervals[i + 5] };
-				B = { intervals[i], intervals[i + 3], intervals[i + 5] };
-				C = { intervals[i + 1], intervals[i + 2], intervals[i + 5] };
-
-				tempColor = box_color(color);
-				glColor3f(tempColor[0], tempColor[1], tempColor[2]);;
-
-
-				// Draw back square.
-				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 5]);
-				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 5]);
-				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 5]);
-				glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 5]);
-				glEnd();
-				glBegin(GL_POLYGON);
-
-				A = { intervals[i], intervals[i + 2], intervals[i + 5] };
-				B = { intervals[i + 1], intervals[i + 2], intervals[i + 5] };
-				C = { intervals[i], intervals[i + 3], intervals[i + 5] };
-
-				tempColor = box_color(color);
-				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
-
 				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 5]);
 				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 5]);
+                glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 5]);
 				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 5]);
-				glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 5]);
 				glEnd();
-				glBegin(GL_POLYGON);
-				
-
-				A = { intervals[i], intervals[i + 2], intervals[i + 4] };
-				B = { intervals[i], intervals[i + 2], intervals[i + 5] };
-				C = { intervals[i + 1], intervals[i + 3], intervals[i + 4] };
-
-				tempColor = box_color(color);
-				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
-
-				// Draw lines between squares.
-				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 4]);
-				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 5]);
-				glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 4]);
-				glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 5]);
-				glEnd();
-				glBegin(GL_POLYGON);
-
-				tempColor = box_color(color);
-				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
                 
+                // Draw the top side.
+				glBegin(GL_POLYGON);
+				tempColor = box_color(color);
+				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
+				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 4]);
 				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 4]);
-				glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 5]);
+                glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 5]);
+				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 5]);
+				glEnd();
+                  
+                // Draw the bottom side.
+				glBegin(GL_POLYGON);
+				tempColor = box_color(color);
+				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
 				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 4]);
+                glVertex3f(intervals[i], intervals[i + 3], intervals[i + 5]);
+                glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 5]);
+				glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 4]);
+                				
+				glEnd();
+                
+                // Draw the left side.
+				glBegin(GL_POLYGON);				
+				tempColor = box_color(color);
+				glColor3f(tempColor[0], tempColor[1], tempColor[2]);
+				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 4]);
+				glVertex3f(intervals[i], intervals[i + 2], intervals[i + 5]);
 				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 5]);
-
+				glVertex3f(intervals[i], intervals[i + 3], intervals[i + 4]);
+				glEnd();               
+                
+				// Draw the right side.
+				glBegin(GL_POLYGON);				
+				tempColor = box_color(color);
+				glColor3f(tempColor[0], tempColor[1], tempColor[2]);                
+                glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 5]);
+                glVertex3f(intervals[i + 1], intervals[i + 2], intervals[i + 4]);
+                glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 4]);				
+				glVertex3f(intervals[i + 1], intervals[i + 3], intervals[i + 5]);				
 				glEnd();
 				
 			}
