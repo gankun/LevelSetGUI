@@ -186,10 +186,10 @@ __device__ inline uint determine_valid_interval_sphere(float * start, unsigned l
 	float SX = 0.0;
 	float SY = 0.0;
 	float SZ = 0.0;
-	float xmin = start[0];
-	float xmax = start[1];
-	float ymin = start[2];
-	float ymax = start[3];
+	float xmin = C1X;
+	float xmax = C2X;
+	float ymin = C1Y;
+	float ymax = C2Y;
 
     float dist_squared = R * R;
     /* assume C1 and C2 are element-wise sorted, if not, do that now */
@@ -383,7 +383,7 @@ int main(int argc, char **argv) {
 			//printf("array size: %lu, interval_offsets_bytes: %lu\n",array_sizes[i], interval_offsets_bytes[i]);
 			//for(int z = 0; z < array_sizes[i] / sizeof(float); ++z)
 		 		//printf("MEMCPY: candidate_intervals[%d]: %f\n", z, *(intervals_start_addr + z));
-			gpuErrchk( cudaMemcpy(dev_candidate_intervals[i], intervals_start_addr, array_sizes[i], cudaMemcpyHostToDevice) );
+			gpuErrchk( cudaMemcpyAsync(dev_candidate_intervals[i], intervals_start_addr, array_sizes[i], cudaMemcpyHostToDevice) );
 
 			branch_and_bound<<<NUM_BLOCKS, MAX_BLOCK_SIZE>>> (dev_candidate_intervals[i], array_sizes[i] / sizeof(float), NUM_DIMS);
 	        // Check for errors on kernel call
@@ -391,23 +391,22 @@ int main(int argc, char **argv) {
 	        if(cudaSuccess != err)
 	            printf("Error %s\n",cudaGetErrorString(err));
 	     	// Read back the procesed intervals ontop of their old data
-		 	gpuErrchk( cudaMemcpy(&candidate_intervals[0] + interval_offsets_bytes[i] / sizeof(float),
+		 	gpuErrchk( cudaMemcpyAsync(&candidate_intervals[0] + interval_offsets_bytes[i] / sizeof(float),
 		 	 	dev_candidate_intervals[i], 
 		 		array_sizes[i],
 		 		cudaMemcpyDeviceToHost) );
 		 	gpuErrchk( cudaFree(dev_candidate_intervals[i]) );
 		 	// for(int z = 0; z < candidate_intervals.size(); ++z)
 		 	// 	printf("CPU: dev_candidate_intervals[%d]: %f\n", z, candidate_intervals[z]);
-			final = clock();
 		}
 		update_candidates(candidate_intervals, satisfactory_intervals, NUM_DIMS, EPSILON);
-
 		// UPDATE INTERVALS ON GUI
 
 		LS_GUI.update_candidates(candidate_intervals);
 		LS_GUI.update_solutions(satisfactory_intervals);
-                LS_GUI.display();
-
+        LS_GUI.display();
+    	//sleep(1);
+		final = clock();
 // if (iterations < 25)
 // {
  
@@ -420,13 +419,12 @@ int main(int argc, char **argv) {
 
 		printf("Iteration %lu time: %f (s). Num candidates: %lu, Num solutions: %lu\n",
 			iterations,
-			(float)(final - initial) / CLOCKS_PER_SEC,
+			double(final - initial) / CLOCKS_PER_SEC,
 			candidate_intervals.size() / (2 * NUM_DIMS),
 			satisfactory_intervals.size() / (2 * NUM_DIMS)
 		);
 		// for(int i = 0; i < candidate_intervals.size(); ++i)
 		// 	printf("candidate_intervals[%d]: %f\n", i, candidate_intervals[i]);
-		sleep(1);
 
 	}
 	// cleanup host	
@@ -436,6 +434,11 @@ int main(int argc, char **argv) {
 			delete [] initial_search_spaces[i][j];
 		}
 	}
+	// // Clean up streams
+	// for(int i = 0; i < num_devices; ++i) {
+	//     gpuErrchk( cudaStreamDestroy(streams[i]) );
+	// }
+
 	for(int i = 0; i < num_devices; ++i) {
 		delete [] initial_search_spaces[i];
 	}
